@@ -1,6 +1,7 @@
+import sys
 import aiohttp
 import asyncio
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 class GBFPLC():
     def __init__(self):
@@ -39,6 +40,15 @@ class GBFPLC():
             else:
                 return True
 
+    def print(self, pid):
+        if "-color" in sys.argv:
+            color1 = "\u001b[32m"
+            color2 = "\u001b[36m"
+        else:
+            color1 = ""
+            color2 = ""
+        print(f"GBF Playerbase\n{color1}{(datetime.now(timezone.utc) + timedelta(seconds=32400)).strftime("%d/%m/%Y")} (JST)\n{color2}{pid:,}")
+
     async def run(self):
         async with aiohttp.ClientSession() as self.client:
             try:
@@ -49,8 +59,8 @@ class GBFPLC():
                 await self.query("/tutorial/content/index/2/1")
                 await self.query("/tutorial/save_sex", payload={"special_token": None, "sex": 0})
                 page = await self.request()
-                self.ID = int((page.split('"userId":')[1].split(',', 1)[0]).strip())
-                print("GBF Playerbase:", self.ID - 1)
+                pid = int((page.split('"userId":')[1].split(',', 1)[0]).strip())
+                self.print(pid - 1)
             except Exception as e:
                 print(e)
                 print("An exception occured")
